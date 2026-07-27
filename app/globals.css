@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Apply the body font family as the default for all text */
+  body {
+    @apply font-body;
+  }
+
+  /* Apply heading font to all heading elements */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+}
+
+/*
+ * WCAG AA Contrast Audit (Requirement 13.1)
+ * ─────────────────────────────────────────
+ * brand-cream (#FBF3E8) text on brand-burgundy (#7A0C1B) background
+ *
+ * Relative luminance:
+ *   brand-cream  L = 0.9099
+ *   brand-burgundy L = 0.0446
+ *
+ * Contrast ratio = (0.9099 + 0.05) / (0.0446 + 0.05) = 10.15:1
+ *
+ * WCAG AA requires 4.5:1 for normal text and 3:1 for large text.
+ * Result: PASS ✓ (10.15:1 exceeds both thresholds)
+ */
+
+@layer utilities {
+  /* Hero diagonal clip-path — desktop */
+  .clip-hero {
+    clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+  }
+
+  /* Hero diagonal clip-path — mobile (reduced angle) */
+  @media (max-width: 640px) {
+    .clip-hero {
+      clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%);
+    }
+  }
+}

@@ -1,0 +1,35 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+enum AttendanceType {
+  FULL_CONVENTION
+  CONSULTATION_ONLY
+  HOLY_MASS_ONLY
+}
+
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model Registration {
+  id             String             @id @default(uuid())
+  fullName       String
+  email          String
+  phone          String
+  country        String
+  city           String
+  attendanceType AttendanceType     @default(FULL_CONVENTION)
+  status         RegistrationStatus @default(CONFIRMED)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([email])
+}

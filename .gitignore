@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Production build
+build/
+
+# Environment variables — never commit secrets
+.env
+.env.local
+.env.production
+
+# Registration data — personal info, manage via FTP
+data/registrations.json
+
+# Generated Prisma client (leftover, not needed)
+generated/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
