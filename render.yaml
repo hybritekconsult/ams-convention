@@ -5,18 +5,15 @@ services:
     region: frankfurt
     plan: free
 
-    # Build: install, build Next.js, then copy assets into standalone folder
     buildCommand: |
       npm ci &&
       npm run build &&
-      cp -r public .next/standalone/public &&
-      cp -r .next/static .next/standalone/.next/static &&
-      mkdir -p .next/standalone/data &&
-      (test -f .next/standalone/data/registrations.json || echo "[]" > .next/standalone/data/registrations.json) &&
-      (test -f .next/standalone/data/settings.json || echo '{"youtubeStreamId":""}' > .next/standalone/data/settings.json)
+      mkdir -p data &&
+      (test -f data/registrations.json || echo "[]" > data/registrations.json) &&
+      (test -f data/settings.json || echo '{"youtubeStreamId":""}' > data/settings.json)
 
-    # Render injects PORT automatically — bind to 0.0.0.0 so Render's proxy can reach it
-    startCommand: HOSTNAME=0.0.0.0 node .next/standalone/server.js
+    # next start respects PORT env var set by Render automatically
+    startCommand: npm start
 
     autoDeploy: true
     branch: master
@@ -25,4 +22,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: ADMIN_PASSWORD
-        sync: false   # Set this in Render dashboard → Environment
+        sync: false   # Set in Render dashboard → your service → Environment
