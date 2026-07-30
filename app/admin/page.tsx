@@ -69,13 +69,24 @@ export default async function AdminPage() {
 
         {/* ── Registrations ── */}
         <section>
-          <div className="flex items-baseline justify-between mb-5">
+          <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading text-brand-burgundy uppercase text-xl font-bold">
               📋 Registrations
             </h2>
-            <span className="bg-brand-burgundy text-brand-cream font-heading text-sm px-3 py-1 rounded-full">
-              {registrations.length} total
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="bg-brand-burgundy text-brand-cream font-heading text-sm px-3 py-1 rounded-full">
+                {registrations.length} total
+              </span>
+              {registrations.length > 0 && (
+                <a
+                  href="/admin/export"
+                  download
+                  className="inline-flex items-center gap-2 bg-brand-gold text-brand-navy font-heading uppercase text-xs tracking-wide px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  ⬇ Download Excel
+                </a>
+              )}
+            </div>
           </div>
 
           <p className="text-brand-burgundy/50 text-xs mb-4">
