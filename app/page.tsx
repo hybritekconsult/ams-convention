@@ -29,11 +29,12 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
             {/* Left — flyer 1 */}
-            <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-2xl">
+            <div className="rounded-xl overflow-hidden shadow-2xl">
               <Image
                 src="/flyer1.jpg"
-                fill
-                className="object-cover object-top"
+                width={600}
+                height={800}
+                className="w-full h-auto object-cover object-top"
                 alt="2026 Amsterdam Convention — Breaking Destiny Limitations official flyer"
               />
             </div>
