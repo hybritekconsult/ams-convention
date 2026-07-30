@@ -15,8 +15,8 @@ services:
       (test -f .next/standalone/data/registrations.json || echo "[]" > .next/standalone/data/registrations.json) &&
       (test -f .next/standalone/data/settings.json || echo '{"youtubeStreamId":""}' > .next/standalone/data/settings.json)
 
-    # Render injects PORT automatically — standalone Next.js server respects it
-    startCommand: node .next/standalone/server.js
+    # Render injects PORT automatically — bind to 0.0.0.0 so Render's proxy can reach it
+    startCommand: HOSTNAME=0.0.0.0 node .next/standalone/server.js
 
     autoDeploy: true
     branch: master
