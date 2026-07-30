@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: ams-convention
+    runtime: node
+    region: frankfurt  # Closest to Amsterdam
+    plan: free
+
+    # Build command — installs deps and builds Next.js standalone
+    buildCommand: npm ci && npm run build
+
+    # Start command — runs the standalone Next.js server
+    startCommand: node .next/standalone/server.js
+
+    # Copy required assets into standalone build before starting
+    preDeployCommand: |
+      cp -r public .next/standalone/public &&
+      cp -r .next/static .next/standalone/.next/static &&
+      mkdir -p .next/standalone/data &&
+      test -f .next/standalone/data/registrations.json || echo "[]" > .next/standalone/data/registrations.json
+
+    # Auto-deploy on every push to master
+    autoDeploy: true
+    branch: master
+
+    # Environment variables — set these in the Render dashboard
+    # Dashboard: https://dashboard.render.com → your service → Environment
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: YOUTUBE_STREAM_ID
+        value: ""           # Set in Render dashboard when going live
+      - key: ADMIN_PASSWORD
+        sync: false         # Set securely in Render dashboard — not stored here
