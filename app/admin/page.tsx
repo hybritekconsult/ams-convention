@@ -1,5 +1,7 @@
-import { getAllRegistrations } from "@/lib/storage";
+import { getAllRegistrations, getStreamId } from "@/lib/storage";
 import { StreamConfigForm } from "@/components/stream-config-form";
+
+export const dynamic = "force-dynamic";
 
 interface AdminPageProps {
   searchParams: Promise<{ key?: string }>;
@@ -32,7 +34,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   }
 
   const registrations = getAllRegistrations();
-  const currentStreamId = process.env.YOUTUBE_STREAM_ID ?? "";
+  const currentStreamId = getStreamId();
 
   return (
     <div className="min-h-screen bg-brand-cream py-16">

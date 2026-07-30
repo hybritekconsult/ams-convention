@@ -55,3 +55,33 @@ export function createRegistration(
 export function getAllRegistrations(): StoredRegistration[] {
   return readAll();
 }
+
+// ── Stream settings storage ──────────────────────────────────────────────────
+
+const SETTINGS_FILE = path.join(process.cwd(), "data", "settings.json");
+
+interface Settings {
+  youtubeStreamId: string;
+}
+
+function readSettings(): Settings {
+  try {
+    const raw = fs.readFileSync(SETTINGS_FILE, "utf-8");
+    return JSON.parse(raw) as Settings;
+  } catch {
+    return { youtubeStreamId: "" };
+  }
+}
+
+function writeSettings(settings: Settings): void {
+  fs.mkdirSync(path.dirname(SETTINGS_FILE), { recursive: true });
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2), "utf-8");
+}
+
+export function getStreamId(): string {
+  return readSettings().youtubeStreamId;
+}
+
+export function saveStreamId(id: string): void {
+  writeSettings({ ...readSettings(), youtubeStreamId: id.trim() });
+}
