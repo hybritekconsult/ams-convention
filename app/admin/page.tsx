@@ -1,36 +1,14 @@
+import { redirect } from "next/navigation";
+import { isAdminAuthenticated, adminLogout } from "@/app/actions/auth";
 import { getAllRegistrations, getStreamId } from "@/lib/storage";
 import { StreamConfigForm } from "@/components/stream-config-form";
 
 export const dynamic = "force-dynamic";
 
-interface AdminPageProps {
-  searchParams: Promise<{ key?: string }>;
-}
-
-export default async function AdminPage({ searchParams }: AdminPageProps) {
-  const params = await searchParams;
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "admin2026";
-  const isAuthorised = params.key === adminPassword;
-
-  if (!isAuthorised) {
-    return (
-      <div className="min-h-screen bg-brand-burgundy flex items-center justify-center px-4">
-        <div className="bg-brand-cream rounded-xl p-8 max-w-sm w-full text-center">
-          <h1 className="font-heading text-brand-burgundy uppercase text-2xl font-bold mb-4">
-            Admin Access
-          </h1>
-          <p className="text-brand-burgundy/60 text-sm mb-4">
-            Add your admin key to the URL to access the admin panel:
-          </p>
-          <code className="block bg-brand-burgundy/10 text-brand-burgundy text-xs px-3 py-2 rounded font-mono">
-            /admin?key=YOUR_PASSWORD
-          </code>
-          <p className="text-brand-burgundy/40 text-xs mt-4">
-            Set ADMIN_PASSWORD in your .env file.
-          </p>
-        </div>
-      </div>
-    );
+export default async function AdminPage() {
+  const authenticated = await isAdminAuthenticated();
+  if (!authenticated) {
+    redirect("/admin/login");
   }
 
   const registrations = getAllRegistrations();
@@ -41,13 +19,24 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       <div className="container mx-auto px-4 md:px-8 max-w-5xl">
 
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="font-heading text-brand-burgundy uppercase text-3xl font-bold">
-            Admin Panel
-          </h1>
-          <p className="text-brand-burgundy/50 text-sm mt-1">
-            Destiny Limitations 2026 — Convention Management
-          </p>
+        <div className="flex items-start justify-between mb-10">
+          <div>
+            <h1 className="font-heading text-brand-burgundy uppercase text-3xl font-bold">
+              Admin Panel
+            </h1>
+            <p className="text-brand-burgundy/50 text-sm mt-1">
+              Destiny Limitations 2026 — Convention Management
+            </p>
+          </div>
+          {/* Logout */}
+          <form action={adminLogout}>
+            <button
+              type="submit"
+              className="text-brand-burgundy/60 hover:text-brand-burgundy text-sm font-heading uppercase tracking-wide border border-brand-burgundy/20 px-4 py-2 rounded-lg hover:border-brand-burgundy/40 transition-colors"
+            >
+              Sign Out
+            </button>
+          </form>
         </div>
 
         {/* ── YouTube Stream Config ── */}
@@ -64,19 +53,16 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               . Leave empty to show the &ldquo;Stream Not Yet Live&rdquo; message.
             </p>
 
-            <StreamConfigForm currentStreamId={currentStreamId} adminKey={params.key ?? ""} />
+            <StreamConfigForm currentStreamId={currentStreamId} adminKey="" />
 
             <div className="mt-4 p-3 bg-brand-cream rounded-lg text-xs text-brand-burgundy/50">
               <strong className="text-brand-burgundy/70">How to find the YouTube Video ID:</strong>
               <br />
-              From a YouTube URL like{" "}
+              From a URL like{" "}
               <code className="bg-brand-burgundy/10 px-1 rounded">
-                https://youtube.com/watch?v=
-                <span className="text-brand-gold font-bold">dQw4w9WgXcQ</span>
+                https://youtube.com/watch?v=<span className="text-brand-gold font-bold">dQw4w9WgXcQ</span>
               </code>
-              , the ID is the part after <code>v=</code>.
-              <br />
-              For a live stream, use the stream URL the same way.
+              , the ID is the bold part after <code>v=</code>.
             </div>
           </div>
         </section>
@@ -94,10 +80,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
           <p className="text-brand-burgundy/50 text-xs mb-4">
             Data stored in{" "}
-            <code className="bg-brand-burgundy/10 px-1 rounded">
-              data/registrations.json
-            </code>
-            . Download the file via FTP to export or back up.
+            <code className="bg-brand-burgundy/10 px-1 rounded">data/registrations.json</code>.
           </p>
 
           {registrations.length === 0 ? (
@@ -109,34 +92,23 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               <table className="w-full text-sm">
                 <thead className="bg-brand-burgundy text-brand-cream">
                   <tr>
-                    {["#", "Name", "Email", "Phone", "Country", "City", "Type", "Date"].map(
-                      (h) => (
-                        <th
-                          key={h}
-                          className="px-4 py-3 text-left font-heading uppercase text-xs tracking-wider whitespace-nowrap"
-                        >
-                          {h}
-                        </th>
-                      )
-                    )}
+                    {["#", "Name", "Email", "Phone", "Country", "City", "Type", "Date"].map((h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-left font-heading uppercase text-xs tracking-wider whitespace-nowrap"
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {registrations.map((r, i) => (
-                    <tr
-                      key={r.id}
-                      className={i % 2 === 0 ? "bg-white" : "bg-brand-cream/50"}
-                    >
-                      <td className="px-4 py-3 text-brand-burgundy/40 text-xs">
-                        {i + 1}
-                      </td>
-                      <td className="px-4 py-3 font-medium text-brand-burgundy whitespace-nowrap">
-                        {r.fullName}
-                      </td>
+                    <tr key={r.id} className={i % 2 === 0 ? "bg-white" : "bg-brand-cream/50"}>
+                      <td className="px-4 py-3 text-brand-burgundy/40 text-xs">{i + 1}</td>
+                      <td className="px-4 py-3 font-medium text-brand-burgundy whitespace-nowrap">{r.fullName}</td>
                       <td className="px-4 py-3 text-brand-burgundy/80">{r.email}</td>
-                      <td className="px-4 py-3 text-brand-burgundy/80 whitespace-nowrap">
-                        {r.phone}
-                      </td>
+                      <td className="px-4 py-3 text-brand-burgundy/80 whitespace-nowrap">{r.phone}</td>
                       <td className="px-4 py-3 text-brand-burgundy/80">{r.country}</td>
                       <td className="px-4 py-3 text-brand-burgundy/80">{r.city}</td>
                       <td className="px-4 py-3 text-brand-burgundy/80 text-xs whitespace-nowrap">
