@@ -11,7 +11,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 
-  const registrations = getAllRegistrations();
+  const registrations = await getAllRegistrations();
 
   // Build CSV — Excel opens UTF-8 CSV with BOM correctly
   const BOM = "\uFEFF";

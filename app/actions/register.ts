@@ -11,7 +11,6 @@ import type { ActionResponse } from "@/lib/types";
 export async function registerAttendee(
   input: unknown
 ): Promise<ActionResponse<StoredRegistration>> {
-  // Step 1: Validate with Zod
   const parsed = registerSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -21,8 +20,7 @@ export async function registerAttendee(
     };
   }
 
-  // Step 2: Check for duplicate email
-  const existing = findByEmail(parsed.data.email);
+  const existing = await findByEmail(parsed.data.email);
   if (existing) {
     return {
       success: false,
@@ -30,9 +28,8 @@ export async function registerAttendee(
     };
   }
 
-  // Step 3: Persist to JSON file
   try {
-    const record = createRegistration(parsed.data);
+    const record = await createRegistration(parsed.data);
     return { success: true, message: "Registration successful!", data: record };
   } catch {
     return {

@@ -1,10 +1,9 @@
 import { getStreamId } from "@/lib/storage";
 
-// Always fetch fresh — no caching so stream ID updates are instant
 export const dynamic = "force-dynamic";
 
-export default function StreamPage() {
-  const streamId = getStreamId();
+export default async function StreamPage() {
+  const streamId = await getStreamId();
 
   return (
     <div className="min-h-screen bg-brand-burgundy py-16">

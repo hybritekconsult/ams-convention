@@ -5,12 +5,7 @@ services:
     region: frankfurt
     plan: free
 
-    buildCommand: |
-      npm ci &&
-      npm run build &&
-      mkdir -p data &&
-      (test -f data/registrations.json || echo "[]" > data/registrations.json) &&
-      (test -f data/settings.json || echo '{"youtubeStreamId":""}' > data/settings.json)
+    buildCommand: npm ci && npm run build
 
     # next start respects PORT env var set by Render automatically
     startCommand: npm start
@@ -21,5 +16,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        sync: false   # Set in Render dashboard — your Neon connection string
       - key: ADMIN_PASSWORD
-        sync: false   # Set in Render dashboard → your service → Environment
+        sync: false   # Set in Render dashboard

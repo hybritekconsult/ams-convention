@@ -11,8 +11,8 @@ export default async function AdminPage() {
     redirect("/admin/login");
   }
 
-  const registrations = getAllRegistrations();
-  const currentStreamId = getStreamId();
+  const registrations = await getAllRegistrations();
+  const currentStreamId = await getStreamId();
 
   return (
     <div className="min-h-screen bg-brand-cream py-16">

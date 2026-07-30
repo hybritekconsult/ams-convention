@@ -1,11 +1,19 @@
 // lib/storage.ts
-// Simple JSON file storage for registrations — no database required.
-// Works on shared cPanel hosting with no DB setup needed.
+// Storage layer — backed by PostgreSQL (Neon) for persistence across deploys.
+// All exported function signatures are unchanged from the previous JSON implementation.
 
-import fs from "fs";
-import path from "path";
+import { pool } from "./db";
+import { initDb } from "./db-init";
 
-const DATA_FILE = path.join(process.cwd(), "data", "registrations.json");
+let initialised = false;
+async function ensureInit() {
+  if (!initialised) {
+    await initDb();
+    initialised = true;
+  }
+}
+
+// ── Registrations ────────────────────────────────────────────────────────────
 
 export interface StoredRegistration {
   id: string;
@@ -19,69 +27,78 @@ export interface StoredRegistration {
   createdAt: string; // ISO string
 }
 
-function readAll(): StoredRegistration[] {
-  try {
-    const raw = fs.readFileSync(DATA_FILE, "utf-8");
-    return JSON.parse(raw) as StoredRegistration[];
-  } catch {
-    return [];
-  }
-}
-
-function writeAll(records: StoredRegistration[]): void {
-  fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-  fs.writeFileSync(DATA_FILE, JSON.stringify(records, null, 2), "utf-8");
-}
-
-export function findByEmail(email: string): StoredRegistration | undefined {
-  return readAll().find((r) => r.email === email);
-}
-
-export function createRegistration(
-  input: Omit<StoredRegistration, "id" | "status" | "createdAt">
-): StoredRegistration {
-  const records = readAll();
-  const record: StoredRegistration = {
-    ...input,
-    id: crypto.randomUUID(),
+// Map snake_case DB row → camelCase interface
+function rowToRegistration(row: Record<string, string>): StoredRegistration {
+  return {
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    country: row.country,
+    city: row.city,
+    attendanceType: row.attendance_type as StoredRegistration["attendanceType"],
     status: "CONFIRMED",
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(row.created_at).toISOString(),
   };
-  records.push(record);
-  writeAll(records);
-  return record;
 }
 
-export function getAllRegistrations(): StoredRegistration[] {
-  return readAll();
+export async function findByEmail(
+  email: string
+): Promise<StoredRegistration | undefined> {
+  await ensureInit();
+  const res = await pool.query(
+    "SELECT * FROM registrations WHERE email = $1 LIMIT 1",
+    [email]
+  );
+  return res.rows[0] ? rowToRegistration(res.rows[0]) : undefined;
 }
 
-// ── Stream settings storage ──────────────────────────────────────────────────
-
-const SETTINGS_FILE = path.join(process.cwd(), "data", "settings.json");
-
-interface Settings {
-  youtubeStreamId: string;
+export async function createRegistration(
+  input: Omit<StoredRegistration, "id" | "status" | "createdAt">
+): Promise<StoredRegistration> {
+  await ensureInit();
+  const id = crypto.randomUUID();
+  const res = await pool.query(
+    `INSERT INTO registrations
+       (id, full_name, email, phone, country, city, attendance_type, status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, 'CONFIRMED')
+     RETURNING *`,
+    [
+      id,
+      input.fullName,
+      input.email,
+      input.phone,
+      input.country,
+      input.city,
+      input.attendanceType,
+    ]
+  );
+  return rowToRegistration(res.rows[0]);
 }
 
-function readSettings(): Settings {
-  try {
-    const raw = fs.readFileSync(SETTINGS_FILE, "utf-8");
-    return JSON.parse(raw) as Settings;
-  } catch {
-    return { youtubeStreamId: "" };
-  }
+export async function getAllRegistrations(): Promise<StoredRegistration[]> {
+  await ensureInit();
+  const res = await pool.query(
+    "SELECT * FROM registrations ORDER BY created_at DESC"
+  );
+  return res.rows.map(rowToRegistration);
 }
 
-function writeSettings(settings: Settings): void {
-  fs.mkdirSync(path.dirname(SETTINGS_FILE), { recursive: true });
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2), "utf-8");
+// ── Stream settings ───────────────────────────────────────────────────────────
+
+export async function getStreamId(): Promise<string> {
+  await ensureInit();
+  const res = await pool.query(
+    "SELECT value FROM settings WHERE key = 'youtube_stream_id'"
+  );
+  return res.rows[0]?.value ?? "";
 }
 
-export function getStreamId(): string {
-  return readSettings().youtubeStreamId;
-}
-
-export function saveStreamId(id: string): void {
-  writeSettings({ ...readSettings(), youtubeStreamId: id.trim() });
+export async function saveStreamId(id: string): Promise<void> {
+  await ensureInit();
+  await pool.query(
+    `INSERT INTO settings (key, value) VALUES ('youtube_stream_id', $1)
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+    [id.trim()]
+  );
 }
