@@ -5,7 +5,7 @@ services:
     region: frankfurt
     plan: free
 
-    buildCommand: npm ci && npm run build
+    buildCommand: NODE_OPTIONS=--max-old-space-size=400 npm ci && NODE_OPTIONS=--max-old-space-size=400 npm run build
 
     # next start respects PORT env var set by Render automatically
     startCommand: npm start
