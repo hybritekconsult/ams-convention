@@ -1,7 +1,6 @@
 import { Hero } from "@/components/hero";
 import { ScheduleTimeline, DEFAULT_SESSIONS } from "@/components/schedule-timeline";
 import { VenueCard } from "@/components/venue-card";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -30,12 +29,14 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
             {/* Left — flyer 1 */}
             <div className="rounded-xl overflow-hidden shadow-2xl">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/flyer1.jpg"
                 width={600}
                 height={800}
                 className="w-full h-auto object-cover object-top"
                 alt="2026 Amsterdam Convention — Breaking Destiny Limitations official flyer"
+                loading="lazy"
               />
             </div>
 
