@@ -84,7 +84,7 @@ export function Footer({
       {/* Copyright bar */}
       <div className="border-t border-brand-cream/10 py-4 text-center">
         <p className="text-brand-cream/50 text-xs">
-          © {copyrightYear} Destiny Limitations 2026. All rights reserved.
+          © {copyrightYear}. All rights reserved.
         </p>
       </div>
     </footer>

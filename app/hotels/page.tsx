@@ -13,7 +13,7 @@ export default function HotelsPage() {
       name: "Via Suites Amsterdam",
       description:
         "Comfortable suites offering a relaxed atmosphere and great value for your stay during the convention days.",
-      bookingUrl: "https://www.booking.com/Share-Xryx6wB",
+      bookingUrl: "https://www.booking.com/hotel/nl/via-suites-amsterdam.html",
       area: "Amsterdam",
       type: "Suites",
     },

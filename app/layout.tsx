@@ -23,6 +23,10 @@ export const metadata: Metadata = {
   title: "2026 Amsterdam Convention — Breaking Destiny Limitations",
   description:
     "Join us for the 2026 Amsterdam Convention: 'Breaking Destiny Limitations', ministered by Fr. Emmanuel Obimma (Ebube Muonso). Register today.",
+  icons: {
+    icon: "/flyer1.jpg",
+    apple: "/flyer1.jpg",
+  },
 };
 
 const footerCoordinators = [
